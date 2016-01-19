@@ -48,7 +48,8 @@ function (object, sequencingQualityThreshold = 10, mappingQualityThreshold = 20,
 			message("\nReading in file: ", bam.files[i], "...")
 		
 			what <- c("rname", "strand", "pos", "qwidth", "seq", "qual", "mapq")
-			param <- ScanBamParam(what = what, flag = scanBamFlag(isUnmappedQuery = FALSE))
+			## consider the paired-end read and for now, only use the first read
+			param <- ScanBamParam(what = what, flag = scanBamFlag(isUnmappedQuery = FALSE, isFirstMateRead=TRUE, isSecondMateRead=FALSE))
 			bam <- scanBam(bam.files[i], param = param)
 		
 			message("\t-> Filtering out low quality reads...")
