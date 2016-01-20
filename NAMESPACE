@@ -13,6 +13,8 @@ importFrom(rtracklayer, export)
 importFrom(BSgenome, available.genomes)
 importFrom(beanplot, beanplot)
 
+importMethodsFrom(GenomicAlignments, readGAlignments)
+
 importFrom(som, som)
 importFrom(VGAM, zeta)
 

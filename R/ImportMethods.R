@@ -47,14 +47,17 @@ function (object, sequencingQualityThreshold = 10, mappingQualityThreshold = 20,
 	
 			message("\nReading in file: ", bam.files[i], "...")
 		
-			what <- c("rname", "strand", "pos", "qwidth", "seq", "qual", "mapq")
+			what <- c("seq", "qual", "mapq")
 			## consider the paired-end read and for now, only use the first read
 			param <- ScanBamParam(what = what, flag = scanBamFlag(isUnmappedQuery = FALSE, isFirstMateRead=TRUE, isSecondMateRead=FALSE))
-			bam <- scanBam(bam.files[i], param = param)
+			#bam <- scanBam(bam.files[i], param = param)
+			gal <- readGAlignments(bam.files[i], use.names=TRUE, param=param)
 		
 			message("\t-> Filtering out low quality reads...")
 		
-			qual <- bam[[1]]$qual
+			mcolsGal <- elementMetadata(gal)
+			#qual <- bam[[1]]$qual
+			qual <- mcolsGal$qual
 		
 			if(length(unique(width(qual)) != 1)){
 				uniq.quals <- unique(width(qual))
@@ -67,7 +70,7 @@ function (object, sequencingQualityThreshold = 10, mappingQualityThreshold = 20,
 				qa.avg <- as.integer(rowMeans(qa))			
 			}
 		
-			reads.GRanges <- GRanges(seqnames = as.vector(bam[[1]]$rname), IRanges(start = bam[[1]]$pos, width = width(bam[[1]]$seq)), strand = bam[[1]]$strand, qual = qa.avg, mapq = bam[[1]]$mapq, seq = bam[[1]]$seq, read.length = width(bam[[1]]$seq))	
+			reads.GRanges <- GRanges(seqnames = seqnames(gal), IRanges(start =start(gal), end=end(gal)), strand = strand(gal), qual = qa.avg, mapq = mcolsGal$mapq, seq = mcolsGal$seq, read.length = qwidth(gal))
 			reads.GRanges <- reads.GRanges[seqnames(reads.GRanges) %in% seqnames(genome)]
 			reads.GRanges <- reads.GRanges[!(end(reads.GRanges) > seqlengths(genome)[as.character(seqnames(reads.GRanges))])]
 			elementMetadata(reads.GRanges)$mapq[is.na(elementMetadata(reads.GRanges)$mapq)] <- Inf
